@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+	<head lang="en">
+   		<meta charset="utf-8">
+   		<title>A node.js WebRtc example</title>
+	</head>
+	<body>
+		<h1 align="center">A node.js WebRtc example</h1>
+		<form id="testWebRtc">
+			ip: <input type="text" name="ip"><br>
+			msgToSend: <input type="text" name="msg"><br><br>
+			<input type="button" onclick="establishConnectionAndSendMessage()" value="Establish Connection">
+		</form>
+		<p id="event"></p>
+
+		<script>
+			function establishConnectionAndSendMessage() {
+				var form = document.getElementById("testWebRtc");
+				document.getElementById('event').innerHTML = "ip="+form.ip.value+" msg sent="+form.msg.value;
+			}
+		</script>
+	</body>
+</html>
