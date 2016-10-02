@@ -49,13 +49,9 @@
 						if(parsedMsgStep1.msgType == "offer" || parsedMsgStep1.msgType == "answer") {
 							console.log("offerWasReceived:",	parsedMsgStep1);
 							
-							// FOR TESTING PURPOSES. NOT ACTUAL CODE.
-							peerCon1.onicecandidate = function(e) 
-							{
-								console.log("iceCandidates",e);
-							};
-							offer = new SessionDescription(JSON.parse(parsedMsgStep1.offer))
-							peerCon1.setRemoteDescription(offer);
+							
+							//offer = new SessionDescription();
+							peerCon1.setRemoteDescription(JSON.parse(parsedMsgStep1.offer));
 
 							peerCon1.createAnswer(function (answer) {
 								peerCon1.setLocalDescription(answer, function() {
