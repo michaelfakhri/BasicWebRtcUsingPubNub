@@ -7,22 +7,62 @@
 	</head>
 	<body>
 		<h1 align="center">A node.js WebRtc example</h1>
+		<input type="button" onclick="establishPeerToPeerConnection()" value="establish peer connection">
 		<form id="testWebRtc">
-			userName: <input type="text" name="userName" disabled><br>
-			msgToSendToALLConnections: <input type="text" name="msg" disabled><br><br>
+			msgToPeer: <input type="text" name="msg"><br><br>
+			<input type="button" onclick="send()" value="send message">
 		</form>
-			<input type="button" onclick="publishSampleMessage()" value="send sample message on signaling server">
-			<input type="button" onclick="establishPeerToPeerConnection()" value="establish peer connection">
-			<input type="button" onclick="listAvailableChannels()" value="list channels">
-			<input type="button" onclick="createChannel()" value="create channel">
-		<p id="event"></p>
-
 		<script>
 		// PubNub object is the object responsible for communicating with the signaling . It uses a Pub/Sub model for communicating messages.
 			var pubnub = new PubNub({
 						publishKey : 'pub-c-4c1c39f8-813b-4424-9d41-c83b634cad79',
 						subscribeKey : 'sub-c-67dc1f0e-829c-11e6-a8c4-0619f8945a4f'
 					});
+			var ICE_config= {
+				'iceServers': [
+						{'url': 'stun:stun.l.google.com:19302'},
+						{'url': 'stun:stun1.l.google.com:19302'},
+						{'url': 'stun:stun2.l.google.com:19302'},
+						{'url': 'stun:stun3.l.google.com:19302'},
+						{'url': 'stun:stun4.l.google.com:19302'}
+						]};
+			// WebRTC RTCPeerConnection object in chrome is called webkitRTCPeerConnection. It is used to establish video, audio and data streams.
+			var peerCon1 = new webkitRTCPeerConnection(ICE_config);
+			
+			// FOR TESTING PURPOSES. NOT ACTUAL CODE.
+			peerCon1.onicecandidate = function(e) 
+			{
+				if (!e.candidate) return;
+				var publishConfig = 
+					{
+						channel : "test_channel1",
+						message : JSON.stringify(
+									{
+										username: "michael",
+										msgType: "ICE",
+										offer: JSON.stringify(e.candidate)
+									})
+					}
+					pubnub.publish(publishConfig, function(status, response) 
+					{
+						//console.log("Just published a sdp offer message",status, response);
+					})			
+			};
+			
+			var channel = peerCon1.createDataChannel("dataChannel", {});
+
+			channel.onopen = function () {
+				console.error("Channel is now open");
+			};
+			
+			channel.onerror = function (err) {
+				console.error("Channel Error:", err);
+			};
+			
+			channel.onmessage = function (e) {
+				console.log("Got message from PEER:", e.data);
+			}
+
 			// callback functions are added to handle three types of events. 
 			pubnub.addListener({
 				status: function(statusEvent) {
@@ -30,9 +70,21 @@
 					console.log("status message received w/ status", statusEvent);
 				},
 				message: function(message) {
-				// handle messages between subscribers
-					console.log("messageReceived:",	message);
-					//alert(message.message);
+					// handle messages between subscribers
+					var parsedMsgStep1 = JSON.parse(message.message);								
+					var username = parsedMsgStep1.username;
+					if (username == "michael"){
+						if(parsedMsgStep1.msgType == "offer" || parsedMsgStep1.msgType == "answer") {
+							console.log("myOfferWasReceived:",	parsedMsgStep1);
+						} else {
+							console.log("myIceCandidateWasReceived:", parsedMsgStep1);
+
+						}
+					} else {
+						console.log("answerWasReceived:", parsedMsgStep1);
+						offer = new SessionDescription(JSON.parse(parsedMsgStep1.offer))
+						peerCon1.setRemoteDescription(offer);
+					}
 				},
 				presence: function(presenceEvent) {
 					// handle presence
@@ -96,23 +148,7 @@
 			}
 			//Function that uses webRtc to create an offer sdp using STUN servers only for the ICE framework.
 			function establishPeerToPeerConnection() {
-			var ICE_config= {
-					'iceServers': [
-							{'url': 'stun:stun.l.google.com:19302'},
-							{'url': 'stun:stun1.l.google.com:19302'},
-							{'url': 'stun:stun2.l.google.com:19302'},
-							{'url': 'stun:stun3.l.google.com:19302'},
-							{'url': 'stun:stun4.l.google.com:19302'}
-							]};
-				// WebRTC RTCPeerConnection object in chrome is called webkitRTCPeerConnection. It is used to establish video, audio and data streams.
-				var peerCon1 = new webkitRTCPeerConnection(ICE_config);
 				
-				// FOR TESTING PURPOSES. NOT ACTUAL CODE.
-				peerCon1.onicecandidate = function(e) 
-				{
-					console.log(iceCandidates,e);
-				};
-					
 				// create the sdp offer that will be set to the other peer.
 				//This contains 2 callback functions thats executed upon sucessful/failed completion of the setting of the local variable.
 				peerCon1.createOffer(
@@ -130,7 +166,12 @@
 								var publishConfig = 
 								{
 									channel : "test_channel1",
-									message : JSON.stringify(peerCon1.localDescription)
+									message : JSON.stringify(
+												{
+													username: "michael",
+													msgType: "offer",
+													offer: JSON.stringify(peerCon1.localDescription)
+												})
 								}
 								pubnub.publish(publishConfig, function(status, response) 
 								{
@@ -147,6 +188,11 @@
 				console.log("Finished running code that Establishes connection");
 			
 			} // end of establishPeerToPeerConnection
+			
+			function send(){
+				var form = document.getElementById("testWebRtc");
+				channel.send(form.msg.value);
+			}
 			
 		</script>
 	</body>
