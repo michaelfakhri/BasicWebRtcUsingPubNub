@@ -112,7 +112,12 @@
 
 						}
 					} else {
+					if(parsedMsgStep1.msgType == "offer" || parsedMsgStep1.msgType == "answer") 
+					{
 						console.log("myAnswerWasReceived:",	parsedMsgStep1);
+					} else {
+						console.log("myICEcandidateWasReceived:",	parsedMsgStep1);
+					}
 					}
 
 					//alert(message.message);
