@@ -81,9 +81,22 @@
 
 						}
 					} else {
-						console.log("answerWasReceived:", parsedMsgStep1);
-						//offer = new SessionDescription(JSON.parse(parsedMsgStep1.offer))
-						peerCon1.setRemoteDescription(JSON.parse(parsedMsgStep1.offer));
+					if(parsedMsgStep1.msgType == "ICE") {
+
+						peerCon1.addIceCandidate(JSON.parse(parsedMsgStep1.offer), function() 
+							{
+								console.log("adding ICE was successful")
+							}, 
+							function (err)
+							{
+							console.log("Adding ICE failed",err);
+							}); 
+							console.log("IceCandidateWasReceived:", parsedMsgStep1);
+						}else{
+							console.log("answerWasReceived:", parsedMsgStep1);
+							//offer = new SessionDescription(JSON.parse(parsedMsgStep1.offer))
+							peerCon1.setRemoteDescription(JSON.parse(parsedMsgStep1.offer));
+						}
 					}
 				},
 				presence: function(presenceEvent) {

@@ -28,6 +28,24 @@
 						]};
 			// WebRTC RTCPeerConnection object in chrome is called webkitRTCPeerConnection. It is used to establish video, audio and data streams.
 			var peerCon1 = new webkitRTCPeerConnection(ICE_config);
+			peerCon1.onicecandidate = function(e) 
+			{
+				if (!e.candidate) return;
+				var publishConfig = 
+					{
+						channel : "test_channel1",
+						message : JSON.stringify(
+									{
+										username: "himanish",
+										msgType: "ICE",
+										offer: JSON.stringify(e.candidate)
+									})
+					}
+					pubnub.publish(publishConfig, function(status, response) 
+					{
+						//console.log("Just published a sdp offer message",status, response);
+					})			
+			};
 			var channel;
 			peerCon1.ondatachannel = function (e) {
 				channel = e.channel
@@ -82,13 +100,13 @@
 									console.log(err);
 							});
 						} else {
-							addIceCandidate(JSON.parse(parsedMsgStep1.offer), function() 
+							peerCon1.addIceCandidate(JSON.parse(parsedMsgStep1.offer), function() 
 							{
 								console.log("adding ICE was successful")
 							}, 
 							function (err)
 							{
-							console.log("could not create offer, error:",err);
+							console.log("Adding ICE failed",err);
 							}); 
 							console.log("IceCandidateWasReceived:", parsedMsgStep1);
 
