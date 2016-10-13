@@ -1,8 +1,8 @@
 function PubNubSignalingService(client)
 {
-	var channelToUseOnPubNub = "test_channel1";
-	this.clientId = client;
-	// PubNub object is the object responsible for communicating with the signaling . It uses a Pub/Sub model for communicating messages.
+	var CHANNEL_ON_PUBNUB = "test_channel1";
+	// PubNub object is the object responsible for communicating with the signaling server.
+	// It uses a Pub/Sub model for communicating messages.
 	this.pubnub = new PubNub(
 						{
 						publishKey : 'pub-c-4c1c39f8-813b-4424-9d41-c83b634cad79',
@@ -12,16 +12,31 @@ function PubNubSignalingService(client)
 		
 	this.pubnub.subscribe(
 		{
-		channels:[channelToUseOnPubNub],
+		channels:[CHANNEL_ON_PUBNUB],
 		withPresence:true
 		}
 	);
 	
+	this.pubnub.addListener({
+				status: function(statusEvent) {
+					debug("status message received w/ status", statusEvent);
+				},
+				message: function(message) {
+					var parsedMsg = JSON.parse(message.message);
+					if(parsedMsg.destination == client){
+						messageRouter.handleSignalingMessage(parsedMsg.origin, parsedMsg.msgType, parsedMsg.msg);
+					}	
+				},		
+				presence: function(presenceEvent) {
+					debug("presence message received w/ status", presenceEvent);
+				}
+			});
+	
 	this.generateAndSendMessage = function(source, target, messageType, message)
 							{
 								var msg = {
-										channel:channelToUseOnPubNub,
-										message:JSON.stringify(
+										channel: CHANNEL_ON_PUBNUB,
+										message: JSON.stringify(
 													{
 													origin:source,
 													destination:target,
