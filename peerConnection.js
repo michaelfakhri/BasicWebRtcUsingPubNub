@@ -1,6 +1,7 @@
 function peerConnection(client,target)
 {
 	var localPeerConnectionPointer = this; // MF: how bad is this? I really really hate this
+	var fileReader = new FileReader();
 	
 	this.channel;
 	var ICE_config= {
@@ -67,6 +68,7 @@ function peerConnection(client,target)
 	}
 	this.sendText = textSender;
 	this.sendFile = fileSender;
+	// this.onReadAsDataURL = onReadAsDataURL;
 }
 
 function configureChannel(channel) {
@@ -76,8 +78,63 @@ function configureChannel(channel) {
 	channel.onmessage = messageReceiver;
 }
 
-function fileSender(someFile){
+function fileSender(file){
 	//this.channel.send(msg);
+	var reader = new window.FileReader();
+	reader.readAsDataURL(file);
+	reader.onload = onReadAsDataURL.bind(this);
+}
+
+/*
+var reader = new window.FileReader();
+	reader.readAsDataURL(file);
+	var packetLength = 1000;
+    var data = {}; // data object to transmit over data channel
+
+    var text = reader.result; // on first invocation
+
+    if (text.length > packetLength) {
+        data.message = text.slice(0, packetLength); // getting chunk using predefined chunk length
+    } else {
+        data.message = text;
+        data.last = true;
+    }
+
+    debug(text);
+
+    this.channel.send(JSON.stringify(data)); // use JSON.stringify for chrome!
+
+    var remainingDataURL = text.slice(data.message.length);
+    if (remainingDataURL.length) setTimeout(function () {
+        onReadAsDataURL(null, remainingDataURL); // continue transmitting
+    }, 500)
+*/
+
+function onReadAsDataURL(event, text, channel) {
+
+	if(!channel)
+		channel = this.channel;
+
+	var chunkLength = 1000;
+    var data = {}; // data object to transmit over data channel
+
+    if (event) text = event.target.result; // on first invocation
+
+    if (text.length > chunkLength) {
+        data.message = text.slice(0, chunkLength); // getting chunk using predefined chunk length
+    } else {
+        data.message = text;
+        data.last = true;
+    }
+
+    debug(text);
+
+    channel.send(JSON.stringify(data)); // use JSON.stringify for chrome!
+
+    var remainingDataURL = text.slice(data.message.length);
+    if (remainingDataURL.length) setTimeout(function () {
+        onReadAsDataURL(null, remainingDataURL, channel); // continue transmitting
+    }, 500)
 }
 
 function textSender(msg){
@@ -85,7 +142,39 @@ function textSender(msg){
 	this.channel.send(msg);
 }
 
+var arrayToStoreChunks = [];
 function messageReceiver(event) {
 	// For now this is only text but files should be implemented soon
-	console.debug("Got message from PEER: " + event.data,"");
+	// console.debug("Got message from PEER: " + event.data,"");
+
+    var data = JSON.parse(event.data);
+	console.log("Got message from PEER: "+ data.message, event);
+
+	arrayToStoreChunks.push(data.message); // pushing chunks in array
+
+	if (data.last) {
+        saveToDisk(arrayToStoreChunks.join(''), 'fileName');
+        arrayToStoreChunks = []; // resetting array
+    }
+}
+
+function saveToDisk(fileUrl, fileName) {
+
+	var save = document.createElement('a');
+    save.href = fileUrl;
+    save.target = '_blank';
+    save.download = fileName || fileUrl;
+
+    var download = document.createTextNode("Download");
+    save.appendChild(download);
+
+    document.getElementById("downloadFile").appendChild(save);
+/*
+    var event = document.createEvent('Event');
+    event.initEvent('click', true, true);
+
+    save.dispatchEvent(event);
+    (window.URL || window.webkitURL).revokeObjectURL(save.href);
+
+    debug("It got here"); */
 }
