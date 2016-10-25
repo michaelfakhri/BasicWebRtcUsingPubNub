@@ -2,6 +2,9 @@
   "name": "UP2P",
   "author": "michael",
   "version": "0.0.1",
+  "devDependencies": {
+    "tape": "latest",
+  },
   "scripts": {
     "test": "tape test/*.js"
   }
