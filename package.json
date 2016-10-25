@@ -1,0 +1,8 @@
+{
+  "name": "UP2P",
+  "author": "michael",
+  "version": "0.0.1",
+  "scripts": {
+    "test": "tape test/*.js"
+  }
+}
