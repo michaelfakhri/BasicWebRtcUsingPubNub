@@ -4,7 +4,6 @@
   "version": "0.0.1",
   "devDependencies": {
     "tape": "latest",
-    "selenium-webdriver": "latest",
     "chromedriver": "latest",
     "webrtc-utilities": "latest"
   },

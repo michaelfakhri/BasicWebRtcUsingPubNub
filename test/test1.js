@@ -1,7 +1,11 @@
 var test = require('tape');
 
+var webdriver = require('selenium-webdriver');
+var seleniumHelpers = require('webrtc-utilities').seleniumLib;
+
 test('test 1', function(t) {
-        t.pass('test 1 passed YAY!');
-        t.end();
+    var driver = seleniumHelpers.buildDriver();
+    driver.executeScript('return new webkitRTCPeerConnection(null);');
+    t.end();
     }
 );
