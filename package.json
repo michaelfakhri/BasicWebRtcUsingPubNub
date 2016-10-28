@@ -4,10 +4,11 @@
   "version": "0.0.1",
   "devDependencies": {
     "tape": "latest",
+    "geckodriver": "latest",
     "chromedriver": "latest",
-    "webrtc-utilities": "latest"
+    "webrtc-utilities": "git://github.com/michaelfakhri/utilities.git#master"
   },
   "scripts": {
-    "test": "tape test/*.js"
+    "test": "tape test/runAllTests.js"
   }
 }

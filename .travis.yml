@@ -5,13 +5,19 @@ node_js:
 env:
   matrix:
     - BROWSER=chrome  BVER=stable
+    - BROWSER=firefox  BVER=stable
 
 before_script:
+  - rm -rf ./node_modules/webrtc-utilities/
   - npm install
   - ./node_modules/travis-multirunner/setup.sh
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
-  #- /sbin/start-stop-daemon --start --quiet --pidfile /tmp/cucumber_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb-run -- :99 -ac -screen 0 1600x1200x16
+  # equivalent user command /sbin/start-stop-daemon --start --quiet --pidfile /tmp/selenium_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1600x1200x16
 
 script:
   - npm test
+
+after_script:
+  - sh -e /etc/init.d/xvfb stop
+    # equivalent user command /sbin/start-stop-daemon --stop --pidfile /tmp/selenium_xvfb_99.pid
