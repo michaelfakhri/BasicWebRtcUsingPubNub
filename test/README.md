@@ -40,5 +40,5 @@ You can test in one of tw: ways
 
 ## Advanced information about this project
 - The tap testing framework used is defined by the script run from the scripts tag of the package.json
-- The tap methods are enclosed within $repo_root/test/framework/tapBasdTestFramework.js 
+- The tap methods are enclosed within $repo_root/test/framework/tapBasdTestFramework.js
 - more will be added later
