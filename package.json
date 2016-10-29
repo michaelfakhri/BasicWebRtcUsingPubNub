@@ -3,12 +3,14 @@
   "author": "michael",
   "version": "0.0.1",
   "devDependencies": {
-    "tape": "latest",
+    "tap": "latest",
+    "tape-catch": "latest",
     "geckodriver": "latest",
     "chromedriver": "latest",
     "webrtc-utilities": "git://github.com/michaelfakhri/utilities.git#master"
   },
   "scripts": {
-    "test": "tape test/runAllTests.js"
+    "test": "export TAP_FRAMEWORK=\"require('tap').test\"; tap test/sample/sampleTests.js",
+    "test-debug-1": "export TAP_FRAMEWORK=\"require('tape-catch')\"; tape test/sample/sampleTests.js"
   }
 }
