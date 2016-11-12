@@ -25,7 +25,6 @@ function establishPeerTopeerConnection() {
 function sendMsg(){
 	var form = document.getElementById("testWebRtc");
 	peerHandler.getPeer(targetPeer).sendText(form.msg.value);
-	//if(form.file.someOperation)peerHandler.getPeer(targetPeer).sendFile(form.file);
 }
 
 function sendFile() {

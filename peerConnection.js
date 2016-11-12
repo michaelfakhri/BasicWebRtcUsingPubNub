@@ -68,7 +68,6 @@ function peerConnection(client,target)
 	}
 	this.sendText = textSender;
 	this.sendFile = fileSender;
-	// this.onReadAsDataURL = onReadAsDataURL;
 }
 
 function configureChannel(channel) {
@@ -79,36 +78,10 @@ function configureChannel(channel) {
 }
 
 function fileSender(file){
-	//this.channel.send(msg);
 	var reader = new window.FileReader();
 	reader.readAsDataURL(file);
 	reader.onload = onReadAsDataURL.bind(this);
 }
-
-/*
-var reader = new window.FileReader();
-	reader.readAsDataURL(file);
-	var packetLength = 1000;
-    var data = {}; // data object to transmit over data channel
-
-    var text = reader.result; // on first invocation
-
-    if (text.length > packetLength) {
-        data.message = text.slice(0, packetLength); // getting chunk using predefined chunk length
-    } else {
-        data.message = text;
-        data.last = true;
-    }
-
-    debug(text);
-
-    this.channel.send(JSON.stringify(data)); // use JSON.stringify for chrome!
-
-    var remainingDataURL = text.slice(data.message.length);
-    if (remainingDataURL.length) setTimeout(function () {
-        onReadAsDataURL(null, remainingDataURL); // continue transmitting
-    }, 500)
-*/
 
 function onReadAsDataURL(event, text, channel) {
 
@@ -144,8 +117,6 @@ function textSender(msg){
 
 var arrayToStoreChunks = [];
 function messageReceiver(event) {
-	// For now this is only text but files should be implemented soon
-	// console.debug("Got message from PEER: " + event.data,"");
 
     var data = JSON.parse(event.data);
 	console.log("Got message from PEER: "+ data.message, event);
@@ -169,12 +140,4 @@ function saveToDisk(fileUrl, fileName) {
     save.appendChild(download);
 
     document.getElementById("downloadFile").appendChild(save);
-/*
-    var event = document.createEvent('Event');
-    event.initEvent('click', true, true);
-
-    save.dispatchEvent(event);
-    (window.URL || window.webkitURL).revokeObjectURL(save.href);
-
-    debug("It got here"); */
 }
