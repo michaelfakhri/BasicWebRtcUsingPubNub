@@ -1,16 +1,13 @@
 window.onload = function(){
-
-	var himanish = "himanish3";
-	var michael = "michael3";
 	
 	var offerer=window.confirm("Would you like to be the offerer? (One person would be the offerer and the other would be the receiver)")
 	if (!offerer){
 		document.getElementById("ConnectionEstablisher").style.display = "none";
-		myUsername = himanish;
-		targetPeer = michael;
+		myUsername = "himanish1";
+		targetPeer = "michael1";
 	} else {
-		myUsername = michael;
-		targetPeer = himanish;
+		myUsername = "michael1";
+		targetPeer = "himanish1";
 	}
 	signalingService = new PubNubSignalingService(myUsername);
 	messageRouter = new messageRouterAlg1();
