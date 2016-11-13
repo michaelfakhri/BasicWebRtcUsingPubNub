@@ -77,32 +77,40 @@ function configureChannel(channel) {
 	channel.onmessage = messageReceiver;
 }
 
+function textSender(message){
+	var data = {};
+	data.message = message;
+	data.type = "im";
+	this.channel.send(JSON.stringify(data));
+	console.log("Sent message to PEER: " + data.message);
+}
+
 function fileSender(file){
 	var reader = new window.FileReader();
 	reader.readAsDataURL(file);
 	reader.onload = onReadAsDataURL.bind(this);
 }
 
+var PACKET_SIZE = 16000;
 function onReadAsDataURL(event, text, channel) {
 
 	if(!channel)
 		channel = this.channel;
 
-	var chunkLength = 1000;
     var data = {}; // data object to transmit over data channel
+    data.type = "file";
 
     if (event) text = event.target.result; // on first invocation
 
-    if (text.length > chunkLength) {
-        data.message = text.slice(0, chunkLength); // getting chunk using predefined chunk length
+    if (text.length > PACKET_SIZE) {
+        data.message = text.slice(0, PACKET_SIZE); // getting packet using predefined packet size
     } else {
         data.message = text;
         data.last = true;
     }
 
-    debug(text);
-
     channel.send(JSON.stringify(data)); // use JSON.stringify for chrome!
+    console.log("Sent packet to PEER: " + data);
 
     var remainingDataURL = text.slice(data.message.length);
     if (remainingDataURL.length) setTimeout(function () {
@@ -110,23 +118,22 @@ function onReadAsDataURL(event, text, channel) {
     }, 500)
 }
 
-function textSender(msg){
-	console.log("Sent message to PEER: " + msg);
-	this.channel.send(msg);
-}
-
-var arrayToStoreChunks = [];
+var packets = [];
 function messageReceiver(event) {
 
     var data = JSON.parse(event.data);
-	console.log("Got message from PEER: "+ data.message, event);
 
-	arrayToStoreChunks.push(data.message); // pushing chunks in array
+    if(data.type == "im")
+		console.log("Received message from PEER: "+ data.message, event);
 
-	if (data.last) {
-        saveToDisk(arrayToStoreChunks.join(''), 'fileName');
-        arrayToStoreChunks = []; // resetting array
-    }
+	if(data.type == "file") {
+		packets.push(data.message);
+
+		if (data.last) {
+	        saveToDisk(packets.join(''), 'fileName');
+	        packets = [];
+	    }
+	}
 }
 
 function saveToDisk(fileUrl, fileName) {
