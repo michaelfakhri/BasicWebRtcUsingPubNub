@@ -1,6 +1,7 @@
 function peerConnection(client,target)
 {
 	var localPeerConnectionPointer = this; // MF: how bad is this? I really really hate this
+	var fileReader = new FileReader();
 	
 	this.channel;
 	var ICE_config= {
@@ -76,16 +77,74 @@ function configureChannel(channel) {
 	channel.onmessage = messageReceiver;
 }
 
-function fileSender(someFile){
-	//this.channel.send(msg);
+function textSender(message){
+	var data = {};
+	data.message = message;
+	data.type = "im";
+	this.channel.send(JSON.stringify(data));
+	console.log("Sent message to PEER: " + data.message);
 }
 
-function textSender(msg){
-	console.log("Sent message to PEER: " + msg);
-	this.channel.send(msg);
+function fileSender(file){
+	var reader = new window.FileReader();
+	reader.readAsDataURL(file);
+	reader.onload = onReadAsDataURL.bind(this);
 }
 
+var PACKET_SIZE = 16000;
+function onReadAsDataURL(event, text, channel) {
+
+	if(!channel)
+		channel = this.channel;
+
+    var data = {}; // data object to transmit over data channel
+    data.type = "file";
+
+    if (event) text = event.target.result; // on first invocation
+
+    if (text.length > PACKET_SIZE) {
+        data.message = text.slice(0, PACKET_SIZE); // getting packet using predefined packet size
+    } else {
+        data.message = text;
+        data.last = true;
+    }
+
+    channel.send(JSON.stringify(data)); // use JSON.stringify for chrome!
+    console.log("Sent packet to PEER: " + data);
+
+    var remainingDataURL = text.slice(data.message.length);
+    if (remainingDataURL.length) setTimeout(function () {
+        onReadAsDataURL(null, remainingDataURL, channel); // continue transmitting
+    }, 500)
+}
+
+var packets = [];
 function messageReceiver(event) {
-	// For now this is only text but files should be implemented soon
-	console.debug("Got message from PEER: " + event.data,"");
+
+    var data = JSON.parse(event.data);
+
+    if(data.type == "im")
+		console.log("Received message from PEER: "+ data.message, event);
+
+	if(data.type == "file") {
+		packets.push(data.message);
+
+		if (data.last) {
+	        saveToDisk(packets.join(''), 'fileName');
+	        packets = [];
+	    }
+	}
+}
+
+function saveToDisk(fileUrl, fileName) {
+
+	var save = document.createElement('a');
+    save.href = fileUrl;
+    save.target = '_blank';
+    save.download = fileName || fileUrl;
+
+    var download = document.createTextNode("Download");
+    save.appendChild(download);
+
+    document.getElementById("downloadFile").appendChild(save);
 }

@@ -8,16 +8,29 @@
 		<script src="debugger.js"></script>
 		<script src="PubNubSignalingService.js"></script>
 		<script src="peerHandlerAlg1.js"></script>
-		<script src="messageRouterALg1.js"></script>
+		<script src="messageRouterAlg1.js"></script>
 		<script src="peerConnection.js"></script>
 		<script src="main.js"></script>
 	</head>
 	<body>
 		<h1 align="center">U-P2P WebRtc MVP </h1>
 		<input type="button" id="ConnectionEstablisher" onclick="establishPeerTopeerConnection()" value="establish peer connection">
+		<br />
 		<form id="testWebRtc">
-			msgToPeer: <input type="text" name="msg"><br><br>
-			<input type="button" onclick="send()" value="send message">
+			<fieldset>
+				<legend>Send Message</legend>
+				msgToPeer: <input type="text" name="msg">
+				<input type="button" onclick="sendMsg()" value="send message">
+			</fieldset>
+			<br />
+			<fieldset>
+				<legend>Send file</legend>
+				<input type="file" name="file">
+				<input type="button" onclick="sendFile()" value="Send file">
+				<div id="downloadFile">
+
+				</div>
+			</fieldset>
 		</form>
 	</body>
 </html>

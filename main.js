@@ -14,13 +14,17 @@ window.onload = function(){
 	peerHandler = new peerHandlerAlg1();
 }
 
-	function establishPeerTopeerConnection() {
-		peerHandler.createPeer(targetPeer);
-		var peerCon = peerHandler.getPeer(targetPeer).createOffer();
-	}
-	
-	function send(){
-		var form = document.getElementById("testWebRtc");
-		peerHandler.getPeer(targetPeer).sendText(form.msg.value);
-		//if(form.file.someOperation)peerHandler.getPeer(targetPeer).sendFile(form.file);
-	}
+function establishPeerTopeerConnection() {
+	peerHandler.createPeer(targetPeer);
+	var peerCon = peerHandler.getPeer(targetPeer).createOffer();
+}
+
+function sendMsg(){
+	var form = document.getElementById("testWebRtc");
+	peerHandler.getPeer(targetPeer).sendText(form.msg.value);
+}
+
+function sendFile() {
+	var form = document.getElementById("testWebRtc");
+	peerHandler.getPeer(targetPeer).sendFile(form.file.files[0]);
+}
