@@ -3,11 +3,11 @@ window.onload = function(){
 	var offerer=window.confirm("Would you like to be the offerer? (One person would be the offerer and the other would be the receiver)")
 	if (!offerer){
 		document.getElementById("ConnectionEstablisher").style.display = "none";
-		myUsername = "himanish1";
-		targetPeer = "michael1"
+		myUsername = "himanish";
+		targetPeer = "michael"
 	} else {
-		myUsername = "michael1";
-		targetPeer = "himanish1"
+		myUsername = "michael";
+		targetPeer = "himanish"
 	}
 	signalingService = new PubNubSignalingService(myUsername);
 	messageRouter = new messageRouterAlg1();
